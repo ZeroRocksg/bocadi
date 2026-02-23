@@ -197,7 +197,7 @@ export function WeekPlanner({ workspaceId, dishes }: Props) {
             </div>
             <p className="text-sm">
               Costo semanal:{' '}
-              <span className="font-semibold">${weekCost.toFixed(2)}</span>
+              <span className="font-semibold">S/. {weekCost.toFixed(2)}</span>
             </p>
           </div>
 

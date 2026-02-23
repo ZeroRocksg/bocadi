@@ -22,23 +22,19 @@ export default async function CatalogPage() {
 
   const workspaceId = memberRow.workspace_id
 
-  // Platos con proteína e ingredientes
-  const { data: dishes } = await supabase
-    .from('dishes')
-    .select(`
-      *,
-      protein_type:protein_types(*),
-      ingredients(*)
-    `)
-    .eq('workspace_id', workspaceId)
-    .order('created_at', { ascending: false })
-
-  // Tipos de proteína
-  const { data: proteinTypes } = await supabase
-    .from('protein_types')
-    .select('*')
-    .eq('workspace_id', workspaceId)
-    .order('name')
+  // Platos y proteínas en paralelo
+  const [{ data: dishes }, { data: proteinTypes }] = await Promise.all([
+    supabase
+      .from('dishes')
+      .select('*, protein_type:protein_types(*), ingredients(*)')
+      .eq('workspace_id', workspaceId)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('protein_types')
+      .select('*')
+      .eq('workspace_id', workspaceId)
+      .order('name'),
+  ])
 
   return (
     <DishCatalog

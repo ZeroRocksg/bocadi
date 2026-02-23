@@ -72,7 +72,7 @@ export function DishCatalog({ workspaceId, dishes, proteinTypes }: Props) {
       )}
 
       {/* Modal: Crear plato */}
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+      <Dialog open={createOpen} onOpenChange={setCreateOpen} modal={false}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Nuevo plato</DialogTitle>
@@ -87,7 +87,7 @@ export function DishCatalog({ workspaceId, dishes, proteinTypes }: Props) {
       </Dialog>
 
       {/* Modal: Editar plato */}
-      <Dialog open={!!editDish} onOpenChange={open => !open && setEditDish(null)}>
+      <Dialog open={!!editDish} onOpenChange={open => !open && setEditDish(null)} modal={false}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Editar plato</DialogTitle>
@@ -145,7 +145,7 @@ export function DishCatalog({ workspaceId, dishes, proteinTypes }: Props) {
                               </span>
                             )}
                           </span>
-                          <span className="text-zinc-500">${(ing.estimated_cost || 0).toFixed(2)}</span>
+                          <span className="text-zinc-500">S/. {(ing.estimated_cost || 0).toFixed(2)}</span>
                         </li>
                       ))}
                     </ul>
@@ -155,7 +155,7 @@ export function DishCatalog({ workspaceId, dishes, proteinTypes }: Props) {
                 {/* Costo total */}
                 <div className="flex justify-between items-center pt-1 border-t font-semibold">
                   <span>Costo total</span>
-                  <span>${totalCostDetail.toFixed(2)}</span>
+                  <span>S/. {totalCostDetail.toFixed(2)}</span>
                 </div>
 
                 {/* Acciones */}

@@ -42,7 +42,7 @@ export function DishCard({ dish, onClick }: Props) {
           <span className="text-zinc-400">
             {dish.ingredients?.length ?? 0} ingrediente{(dish.ingredients?.length ?? 0) !== 1 ? 's' : ''}
           </span>
-          <span className="font-medium">${totalCost.toFixed(2)}</span>
+          <span className="font-medium">S/. {totalCost.toFixed(2)}</span>
         </div>
       </CardContent>
     </Card>

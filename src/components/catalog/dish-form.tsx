@@ -163,7 +163,7 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
         <div className="flex items-center justify-between">
           <Label>Ingredientes</Label>
           <span className="text-sm font-medium text-zinc-700">
-            Total: ${totalCost.toFixed(2)}
+            Total: S/. {totalCost.toFixed(2)}
           </span>
         </div>
 
