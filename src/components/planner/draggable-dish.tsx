@@ -18,7 +18,7 @@ export function DraggableDish({ dish }: Props) {
       {...listeners}
       {...attributes}
       style={{ opacity: isDragging ? 0.3 : 1 }}
-      className="flex items-center gap-2 px-2 py-1.5 rounded-md border bg-white cursor-grab active:cursor-grabbing hover:shadow-sm transition-all text-sm select-none"
+      className="flex items-center gap-2 px-2 py-1.5 rounded-md border bg-white cursor-grab active:cursor-grabbing hover:shadow-sm transition-all text-sm select-none shrink-0"
     >
       {dish.protein_type ? (
         <span

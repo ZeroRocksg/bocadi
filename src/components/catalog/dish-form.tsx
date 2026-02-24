@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Fragment } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -168,54 +168,101 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
         </div>
 
         <div className="space-y-2">
-          {/* Cabecera */}
-          <div className="grid grid-cols-[1fr_80px_80px_90px_32px] gap-1.5 text-xs text-zinc-400 px-1">
+          {/* Cabecera — solo en desktop */}
+          <div className="hidden sm:grid grid-cols-[1fr_80px_80px_90px_32px] gap-1.5 text-xs text-zinc-400 px-1">
             <span>Nombre</span>
             <span>Cantidad</span>
             <span>Unidad</span>
-            <span>Costo $</span>
+            <span>Costo S/.</span>
             <span />
           </div>
 
           {ingredients.map((ing, idx) => (
-            <div key={idx} className="grid grid-cols-[1fr_80px_80px_90px_32px] gap-1.5 items-center">
-              <Input
-                placeholder="Ej: Arroz"
-                value={ing.name}
-                onChange={e => updateIngredient(idx, 'name', e.target.value)}
-                className="h-8 text-sm"
-              />
-              <Input
-                type="number"
-                placeholder="0"
-                value={ing.quantity ?? ''}
-                onChange={e => updateIngredient(idx, 'quantity', e.target.value ? Number(e.target.value) : null)}
-                className="h-8 text-sm"
-                min={0}
-              />
-              <Input
-                placeholder="gr"
-                value={ing.unit}
-                onChange={e => updateIngredient(idx, 'unit', e.target.value)}
-                className="h-8 text-sm"
-              />
-              <Input
-                type="number"
-                placeholder="0.00"
-                value={ing.estimated_cost || ''}
-                onChange={e => updateIngredient(idx, 'estimated_cost', Number(e.target.value) || 0)}
-                className="h-8 text-sm"
-                min={0}
-                step={0.01}
-              />
-              <button
-                type="button"
-                onClick={() => removeIngredient(idx)}
-                className="h-8 w-8 flex items-center justify-center rounded text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-              >
-                ×
-              </button>
-            </div>
+            <Fragment key={idx}>
+              {/* Mobile: tarjeta con 2 filas */}
+              <div className="sm:hidden border rounded-lg p-2 space-y-1.5">
+                <div className="flex gap-1.5 items-center">
+                  <Input
+                    placeholder="Ej: Arroz"
+                    value={ing.name}
+                    onChange={e => updateIngredient(idx, 'name', e.target.value)}
+                    className="h-8 text-sm flex-1"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeIngredient(idx)}
+                    className="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="grid grid-cols-3 gap-1.5">
+                  <Input
+                    type="number"
+                    placeholder="Cant."
+                    value={ing.quantity ?? ''}
+                    onChange={e => updateIngredient(idx, 'quantity', e.target.value ? Number(e.target.value) : null)}
+                    className="h-8 text-sm"
+                    min={0}
+                  />
+                  <Input
+                    placeholder="Unidad"
+                    value={ing.unit}
+                    onChange={e => updateIngredient(idx, 'unit', e.target.value)}
+                    className="h-8 text-sm"
+                  />
+                  <Input
+                    type="number"
+                    placeholder="S/."
+                    value={ing.estimated_cost || ''}
+                    onChange={e => updateIngredient(idx, 'estimated_cost', Number(e.target.value) || 0)}
+                    className="h-8 text-sm"
+                    min={0}
+                    step={0.01}
+                  />
+                </div>
+              </div>
+
+              {/* Desktop: fila en grid */}
+              <div className="hidden sm:grid grid-cols-[1fr_80px_80px_90px_32px] gap-1.5 items-center">
+                <Input
+                  placeholder="Ej: Arroz"
+                  value={ing.name}
+                  onChange={e => updateIngredient(idx, 'name', e.target.value)}
+                  className="h-8 text-sm"
+                />
+                <Input
+                  type="number"
+                  placeholder="0"
+                  value={ing.quantity ?? ''}
+                  onChange={e => updateIngredient(idx, 'quantity', e.target.value ? Number(e.target.value) : null)}
+                  className="h-8 text-sm"
+                  min={0}
+                />
+                <Input
+                  placeholder="gr"
+                  value={ing.unit}
+                  onChange={e => updateIngredient(idx, 'unit', e.target.value)}
+                  className="h-8 text-sm"
+                />
+                <Input
+                  type="number"
+                  placeholder="0.00"
+                  value={ing.estimated_cost || ''}
+                  onChange={e => updateIngredient(idx, 'estimated_cost', Number(e.target.value) || 0)}
+                  className="h-8 text-sm"
+                  min={0}
+                  step={0.01}
+                />
+                <button
+                  type="button"
+                  onClick={() => removeIngredient(idx)}
+                  className="h-8 w-8 flex items-center justify-center rounded text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                >
+                  ×
+                </button>
+              </div>
+            </Fragment>
           ))}
         </div>
 

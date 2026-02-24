@@ -162,14 +162,14 @@ export function WeekPlanner({ workspaceId, dishes }: Props) {
       onDragStart={e => setActiveId(e.active.id as string)}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex gap-4" style={{ height: 'calc(100vh - 7rem)' }}>
+      <div className="flex flex-col gap-3 lg:flex-row lg:gap-4 lg:h-[calc(100vh-7rem)]">
 
         {/* ── Sidebar de platos ── */}
-        <aside className="w-44 flex-shrink-0 flex flex-col gap-2 overflow-hidden">
+        <aside className="flex-shrink-0 flex flex-col gap-2 lg:w-44 lg:overflow-hidden">
           <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">
             Platos
           </p>
-          <div className="flex-1 overflow-y-auto space-y-1.5 pr-1">
+          <div className="flex flex-row gap-1.5 overflow-x-auto pb-1 lg:flex-col lg:flex-1 lg:overflow-y-auto lg:space-y-1.5 lg:pr-1 lg:pb-0 lg:gap-0">
             {dishes.length === 0 ? (
               <p className="text-xs text-zinc-400 text-center pt-6">
                 Agrega platos en el Catálogo primero.
@@ -186,7 +186,7 @@ export function WeekPlanner({ workspaceId, dishes }: Props) {
         <div className="flex-1 flex flex-col min-w-0">
 
           {/* Header de semana */}
-          <div className="flex items-center justify-between mb-3 flex-shrink-0">
+          <div className="flex items-center justify-between mb-3 flex-shrink-0 flex-wrap gap-y-2">
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={() => setWeekStart(prev => addWeeks(prev, -1))}>←</Button>
               <span className="text-sm font-medium w-36 text-center">{weekLabel}</span>
@@ -202,7 +202,7 @@ export function WeekPlanner({ workspaceId, dishes }: Props) {
           </div>
 
           {/* Grilla */}
-          <div className="flex-1 overflow-auto">
+          <div className="overflow-auto lg:flex-1">
             {loading ? (
               <div className="flex items-center justify-center h-full text-zinc-400 text-sm">
                 Cargando...
