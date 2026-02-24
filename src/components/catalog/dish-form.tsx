@@ -162,14 +162,14 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label>Ingredientes</Label>
-          <span className="text-sm font-medium text-zinc-700">
+          <span className="text-sm font-medium text-foreground">
             Total: S/. {totalCost.toFixed(2)}
           </span>
         </div>
 
         <div className="space-y-2">
           {/* Cabecera — solo en desktop */}
-          <div className="hidden sm:grid grid-cols-[1fr_80px_80px_90px_32px] gap-1.5 text-xs text-zinc-400 px-1">
+          <div className="hidden sm:grid grid-cols-[1fr_80px_80px_90px_32px] gap-1.5 text-xs text-muted-foreground px-1">
             <span>Nombre</span>
             <span>Cantidad</span>
             <span>Unidad</span>
@@ -191,7 +191,7 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
                   <button
                     type="button"
                     onClick={() => removeIngredient(idx)}
-                    className="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                    className="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                   >
                     ×
                   </button>
@@ -257,7 +257,7 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
                 <button
                   type="button"
                   onClick={() => removeIngredient(idx)}
-                  className="h-8 w-8 flex items-center justify-center rounded text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                  className="h-8 w-8 flex items-center justify-center rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                 >
                   ×
                 </button>
@@ -271,7 +271,7 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
         </Button>
       </div>
 
-      {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-md">{error}</p>}
+      {error && <p className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md">{error}</p>}
 
       {/* Acciones */}
       <div className="flex gap-2 justify-end pt-1">

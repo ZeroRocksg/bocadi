@@ -17,7 +17,7 @@ export default async function CatalogPage() {
     .single()
 
   if (!memberRow) {
-    return <div className="text-center py-16 text-zinc-400">No perteneces a ningún workspace.</div>
+    return <div className="text-center py-16 text-muted-foreground">No perteneces a ningún workspace.</div>
   }
 
   const workspaceId = memberRow.workspace_id

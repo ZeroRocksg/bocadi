@@ -166,12 +166,12 @@ export function WeekPlanner({ workspaceId, dishes }: Props) {
 
         {/* ── Sidebar de platos ── */}
         <aside className="flex-shrink-0 flex flex-col gap-2 lg:w-44 lg:overflow-hidden">
-          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
             Platos
           </p>
           <div className="flex flex-row gap-1.5 overflow-x-auto pb-1 lg:flex-col lg:flex-1 lg:overflow-y-auto lg:space-y-1.5 lg:pr-1 lg:pb-0 lg:gap-0">
             {dishes.length === 0 ? (
-              <p className="text-xs text-zinc-400 text-center pt-6">
+              <p className="text-xs text-muted-foreground text-center pt-6">
                 Agrega platos en el Catálogo primero.
               </p>
             ) : (
@@ -204,7 +204,7 @@ export function WeekPlanner({ workspaceId, dishes }: Props) {
           {/* Grilla */}
           <div className="overflow-auto lg:flex-1">
             {loading ? (
-              <div className="flex items-center justify-center h-full text-zinc-400 text-sm">
+              <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
                 Cargando...
               </div>
             ) : (
@@ -215,7 +215,7 @@ export function WeekPlanner({ workspaceId, dishes }: Props) {
                 {/* Cabecera de días */}
                 <div />
                 {DAYS.map(day => (
-                  <div key={day.key} className="text-center text-xs font-semibold text-zinc-500 py-1 uppercase">
+                  <div key={day.key} className="text-center text-xs font-semibold text-muted-foreground py-1 uppercase">
                     {day.label}
                   </div>
                 ))}
@@ -223,7 +223,7 @@ export function WeekPlanner({ workspaceId, dishes }: Props) {
                 {/* Filas por slot */}
                 {SLOTS.map(slot => (
                   <Fragment key={slot.key}>
-                    <div className="flex items-start pt-2 text-xs font-medium text-zinc-400">
+                    <div className="flex items-start pt-2 text-xs font-medium text-muted-foreground">
                       {slot.label}
                     </div>
                     {DAYS.map(day => (
@@ -245,7 +245,7 @@ export function WeekPlanner({ workspaceId, dishes }: Props) {
           {/* Barra de balance nutricional */}
           {proteinList.length > 0 && (
             <div className="mt-3 flex-shrink-0 space-y-1.5">
-              <p className="text-xs text-zinc-400">Balance semanal de proteínas</p>
+              <p className="text-xs text-muted-foreground">Balance semanal de proteínas</p>
               <div className="flex h-3.5 rounded-full overflow-hidden">
                 {proteinList.map(p => (
                   <div
@@ -257,7 +257,7 @@ export function WeekPlanner({ workspaceId, dishes }: Props) {
               </div>
               <div className="flex gap-3 flex-wrap">
                 {proteinList.map(p => (
-                  <span key={p.name} className="flex items-center gap-1 text-xs text-zinc-500">
+                  <span key={p.name} className="flex items-center gap-1 text-xs text-muted-foreground">
                     <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
                     {p.name} {Math.round((p.count / totalProteins) * 100)}%
                   </span>

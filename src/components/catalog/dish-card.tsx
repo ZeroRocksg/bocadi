@@ -35,11 +35,11 @@ export function DishCard({ dish, onClick }: Props) {
         </div>
 
         {dish.description && (
-          <p className="text-sm text-zinc-500 line-clamp-2">{dish.description}</p>
+          <p className="text-sm text-muted-foreground line-clamp-2">{dish.description}</p>
         )}
 
         <div className="flex items-center justify-between text-sm">
-          <span className="text-zinc-400">
+          <span className="text-muted-foreground">
             {dish.ingredients?.length ?? 0} ingrediente{(dish.ingredients?.length ?? 0) !== 1 ? 's' : ''}
           </span>
           <span className="font-medium">S/. {totalCost.toFixed(2)}</span>

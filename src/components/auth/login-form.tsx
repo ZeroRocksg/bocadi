@@ -96,7 +96,7 @@ export function LoginForm() {
             <span className="w-full border-t" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white px-2 text-zinc-500">o continúa con email</span>
+            <span className="bg-background px-2 text-muted-foreground">o continúa con email</span>
           </div>
         </div>
 
@@ -127,7 +127,7 @@ export function LoginForm() {
           </div>
 
           {error && (
-            <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-md">{error}</p>
+            <p className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md">{error}</p>
           )}
           {message && (
             <p className="text-sm text-green-600 bg-green-50 px-3 py-2 rounded-md">{message}</p>
@@ -139,12 +139,12 @@ export function LoginForm() {
         </form>
 
         {/* Toggle modo */}
-        <p className="text-center text-sm text-zinc-500">
+        <p className="text-center text-sm text-muted-foreground">
           {mode === 'login' ? '¿No tienes cuenta?' : '¿Ya tienes cuenta?'}{' '}
           <button
             type="button"
             onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setError(''); setMessage('') }}
-            className="font-medium text-zinc-900 hover:underline"
+            className="font-medium text-foreground hover:underline"
           >
             {mode === 'login' ? 'Regístrate' : 'Inicia sesión'}
           </button>

@@ -19,7 +19,7 @@ export default async function WorkspacePage() {
 
   if (!memberRow) {
     return (
-      <div className="text-center py-16 text-zinc-500">
+      <div className="text-center py-16 text-muted-foreground">
         No perteneces a ningún workspace.
       </div>
     )
@@ -44,7 +44,7 @@ export default async function WorkspacePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">{workspace.name}</h1>
-          <p className="text-sm text-zinc-500 mt-0.5">Gestión del workspace</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Gestión del workspace</p>
         </div>
         <Button variant="outline" asChild>
           <Link href="/workspace/settings">Configuración</Link>

@@ -36,7 +36,7 @@ export default async function WorkspaceSettingsPage() {
         </Button>
         <div>
           <h1 className="text-2xl font-bold">Configuración</h1>
-          <p className="text-sm text-zinc-500">{workspace.name}</p>
+          <p className="text-sm text-muted-foreground">{workspace.name}</p>
         </div>
       </div>
 

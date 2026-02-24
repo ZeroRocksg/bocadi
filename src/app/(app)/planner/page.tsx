@@ -18,7 +18,7 @@ export default async function PlannerPage() {
 
   if (!memberRow) {
     return (
-      <div className="text-center py-16 text-zinc-400">
+      <div className="text-center py-16 text-muted-foreground">
         No perteneces a ningún workspace.
       </div>
     )

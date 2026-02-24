@@ -97,7 +97,7 @@ export function MembersPanel({ workspace, members, currentUserId }: Props) {
         <h2 className="font-semibold mb-3">Miembros ({members.length})</h2>
         <ul className="space-y-2">
           {members.map((m) => (
-            <li key={m.user_id} className="flex items-center justify-between bg-white border rounded-lg px-4 py-2.5">
+            <li key={m.user_id} className="flex items-center justify-between bg-card border rounded-lg px-4 py-2.5">
               <span className="text-sm">{m.email ?? m.user_id}</span>
               <Badge variant={m.role === 'owner' ? 'default' : 'secondary'}>
                 {m.role === 'owner' ? 'Propietario' : 'Miembro'}
@@ -126,7 +126,7 @@ export function MembersPanel({ workspace, members, currentUserId }: Props) {
         </div>
       )}
 
-      {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-md">{error}</p>}
+      {error && <p className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md">{error}</p>}
       {message && <p className="text-sm text-green-600 bg-green-50 px-3 py-2 rounded-md">{message}</p>}
 
       {/* Acciones */}

@@ -52,14 +52,14 @@ export function DishCatalog({ workspaceId, dishes, proteinTypes }: Props) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Catálogo de platos</h1>
-          <p className="text-sm text-zinc-500 mt-0.5">{dishes.length} plato{dishes.length !== 1 ? 's' : ''}</p>
+          <p className="text-sm text-muted-foreground mt-0.5">{dishes.length} plato{dishes.length !== 1 ? 's' : ''}</p>
         </div>
         <Button onClick={() => setCreateOpen(true)}>+ Agregar plato</Button>
       </div>
 
       {/* Grid */}
       {dishes.length === 0 ? (
-        <div className="text-center py-16 text-zinc-400">
+        <div className="text-center py-16 text-muted-foreground">
           <p className="text-lg">No hay platos aún.</p>
           <p className="text-sm mt-1">Agrega tu primer plato con el botón de arriba.</p>
         </div>
@@ -125,13 +125,13 @@ export function DishCatalog({ workspaceId, dishes, proteinTypes }: Props) {
 
               <div className="space-y-4 pt-1">
                 {detailDish.description && (
-                  <p className="text-zinc-600">{detailDish.description}</p>
+                  <p className="text-muted-foreground">{detailDish.description}</p>
                 )}
 
                 {/* Ingredientes */}
                 {detailDish.ingredients && detailDish.ingredients.length > 0 && (
                   <div>
-                    <h4 className="font-medium mb-2 text-sm text-zinc-500 uppercase tracking-wide">
+                    <h4 className="font-medium mb-2 text-sm text-muted-foreground uppercase tracking-wide">
                       Ingredientes
                     </h4>
                     <ul className="divide-y border rounded-lg">
@@ -140,12 +140,12 @@ export function DishCatalog({ workspaceId, dishes, proteinTypes }: Props) {
                           <span>
                             {ing.name}
                             {ing.quantity && (
-                              <span className="text-zinc-400 ml-1">
+                              <span className="text-muted-foreground ml-1">
                                 — {ing.quantity} {ing.unit}
                               </span>
                             )}
                           </span>
-                          <span className="text-zinc-500">S/. {(ing.estimated_cost || 0).toFixed(2)}</span>
+                          <span className="text-muted-foreground">S/. {(ing.estimated_cost || 0).toFixed(2)}</span>
                         </li>
                       ))}
                     </ul>

@@ -68,19 +68,19 @@ export function ProteinTypeManager({ workspaceId, proteinTypes }: Props) {
         <h2 className="font-semibold mb-3">Tipos de proteína</h2>
         <ul className="space-y-2">
           {proteinTypes.map((pt) => (
-            <li key={pt.id} className="flex items-center justify-between bg-white border rounded-lg px-4 py-2.5">
+            <li key={pt.id} className="flex items-center justify-between bg-card border rounded-lg px-4 py-2.5">
               <div className="flex items-center gap-3">
                 <span
-                  className="w-5 h-5 rounded-full border border-zinc-200 flex-shrink-0"
+                  className="w-5 h-5 rounded-full border flex-shrink-0"
                   style={{ backgroundColor: pt.color }}
                 />
                 <span className="text-sm font-medium">{pt.name}</span>
-                <span className="text-xs text-zinc-400">{pt.color}</span>
+                <span className="text-xs text-muted-foreground">{pt.color}</span>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                className="text-destructive hover:bg-destructive/10"
                 onClick={() => handleDelete(pt)}
               >
                 Eliminar
@@ -88,7 +88,7 @@ export function ProteinTypeManager({ workspaceId, proteinTypes }: Props) {
             </li>
           ))}
           {proteinTypes.length === 0 && (
-            <p className="text-sm text-zinc-400 text-center py-4">No hay tipos de proteína aún.</p>
+            <p className="text-sm text-muted-foreground text-center py-4">No hay tipos de proteína aún.</p>
           )}
         </ul>
       </div>
@@ -114,7 +114,7 @@ export function ProteinTypeManager({ workspaceId, proteinTypes }: Props) {
               type="color"
               value={color}
               onChange={e => setColor(e.target.value)}
-              className="h-9 w-14 rounded-md border border-zinc-200 cursor-pointer"
+              className="h-9 w-14 rounded-md border cursor-pointer"
             />
           </div>
           <Button type="submit" disabled={loading}>
@@ -123,7 +123,7 @@ export function ProteinTypeManager({ workspaceId, proteinTypes }: Props) {
         </form>
       </div>
 
-      {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-md">{error}</p>}
+      {error && <p className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md">{error}</p>}
     </div>
   )
 }

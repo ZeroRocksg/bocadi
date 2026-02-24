@@ -19,8 +19,8 @@ export function DroppableCell({ id, entries, onRemove }: Props) {
       ref={setNodeRef}
       className={`min-h-[72px] rounded-md border-2 p-1 space-y-1 transition-colors ${
         isOver
-          ? 'border-blue-400 bg-blue-50'
-          : 'border-zinc-200 bg-zinc-50 hover:border-zinc-300'
+          ? 'border-primary bg-primary/10'
+          : 'border-border bg-muted hover:border-muted-foreground'
       }`}
     >
       {entries.map(entry => (
