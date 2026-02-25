@@ -21,6 +21,7 @@ const emptyIngredient = (): IngredientFormData => ({
   quantity: null,
   unit: '',
   estimated_cost: 0,
+  estimated_kcal: 0,
 })
 
 export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: Props) {
@@ -31,17 +32,21 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
   const [ingredients, setIngredients] = useState<IngredientFormData[]>(
     dish?.ingredients?.length
       ? dish.ingredients.map(i => ({
+          id: i.id,
           name: i.name,
           quantity: i.quantity,
           unit: i.unit ?? '',
           estimated_cost: i.estimated_cost,
+          estimated_kcal: i.estimated_kcal ?? 0,
         }))
       : [emptyIngredient()]
   )
   const [loading, setLoading] = useState(false)
+  const [estimating, setEstimating] = useState(false)
   const [error, setError] = useState('')
 
   const totalCost = ingredients.reduce((sum, i) => sum + (Number(i.estimated_cost) || 0), 0)
+  const totalKcal = ingredients.reduce((sum, i) => sum + (Number(i.estimated_kcal) || 0), 0)
 
   function updateIngredient(index: number, field: keyof IngredientFormData, value: string | number | null) {
     setIngredients(prev =>
@@ -57,6 +62,25 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
     setIngredients(prev => prev.filter((_, i) => i !== index))
   }
 
+  async function estimateKcalForIngredients(savedIngredients: { id: string; name: string; quantity: number | null; unit: string | null }[]) {
+    setEstimating(true)
+    await Promise.all(
+      savedIngredients.map(ing =>
+        fetch('/api/estimate-kcal', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ingredientId: ing.id,
+            name: ing.name,
+            quantity: ing.quantity,
+            unit: ing.unit,
+          }),
+        }).catch(() => null)
+      )
+    )
+    setEstimating(false)
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -65,7 +89,6 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
     const validIngredients = ingredients.filter(i => i.name.trim())
 
     if (dish) {
-      // Editar
       const { error: dishError } = await supabase
         .from('dishes')
         .update({
@@ -77,15 +100,26 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
 
       if (dishError) { setError(dishError.message); setLoading(false); return }
 
-      // Reemplazar ingredientes
       await supabase.from('ingredients').delete().eq('dish_id', dish.id)
       if (validIngredients.length) {
-        await supabase.from('ingredients').insert(
-          validIngredients.map(i => ({ ...i, dish_id: dish.id }))
-        )
+        const { data: inserted } = await supabase
+          .from('ingredients')
+          .insert(validIngredients.map(i => ({
+            name: i.name,
+            quantity: i.quantity,
+            unit: i.unit || null,
+            estimated_cost: i.estimated_cost,
+            estimated_kcal: 0,
+            dish_id: dish.id,
+          })))
+          .select('id, name, quantity, unit')
+
+        setLoading(false)
+        if (inserted?.length) await estimateKcalForIngredients(inserted)
+      } else {
+        setLoading(false)
       }
     } else {
-      // Crear
       const { data: newDish, error: dishError } = await supabase
         .from('dishes')
         .insert({
@@ -100,13 +134,25 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
       if (dishError || !newDish) { setError(dishError?.message ?? 'Error'); setLoading(false); return }
 
       if (validIngredients.length) {
-        await supabase.from('ingredients').insert(
-          validIngredients.map(i => ({ ...i, dish_id: newDish.id }))
-        )
+        const { data: inserted } = await supabase
+          .from('ingredients')
+          .insert(validIngredients.map(i => ({
+            name: i.name,
+            quantity: i.quantity,
+            unit: i.unit || null,
+            estimated_cost: i.estimated_cost,
+            estimated_kcal: 0,
+            dish_id: newDish.id,
+          })))
+          .select('id, name, quantity, unit')
+
+        setLoading(false)
+        if (inserted?.length) await estimateKcalForIngredients(inserted)
+      } else {
+        setLoading(false)
       }
     }
 
-    setLoading(false)
     onSave()
   }
 
@@ -146,10 +192,7 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
             {proteinTypes.map(pt => (
               <SelectItem key={pt.id} value={pt.id}>
                 <span className="flex items-center gap-2">
-                  <span
-                    className="inline-block w-3 h-3 rounded-full"
-                    style={{ backgroundColor: pt.color }}
-                  />
+                  <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: pt.color }} />
                   {pt.name}
                 </span>
               </SelectItem>
@@ -162,24 +205,28 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label>Ingredientes</Label>
-          <span className="text-sm font-medium text-foreground">
-            Total: S/. {totalCost.toFixed(2)}
-          </span>
+          <div className="text-right text-sm">
+            <span className="font-medium text-foreground">S/. {totalCost.toFixed(2)}</span>
+            {totalKcal > 0 && (
+              <span className="ml-2 text-muted-foreground">~{totalKcal} kcal</span>
+            )}
+          </div>
         </div>
 
         <div className="space-y-2">
-          {/* Cabecera — solo en desktop */}
-          <div className="hidden sm:grid grid-cols-[1fr_80px_80px_90px_32px] gap-1.5 text-xs text-muted-foreground px-1">
+          {/* Cabecera desktop */}
+          <div className="hidden sm:grid grid-cols-[1fr_70px_70px_80px_70px_32px] gap-1.5 text-xs text-muted-foreground px-1">
             <span>Nombre</span>
             <span>Cantidad</span>
             <span>Unidad</span>
             <span>Costo S/.</span>
+            <span>kcal ✨</span>
             <span />
           </div>
 
           {ingredients.map((ing, idx) => (
             <Fragment key={idx}>
-              {/* Mobile: tarjeta con 2 filas */}
+              {/* Mobile */}
               <div className="sm:hidden border rounded-lg p-2 space-y-1.5">
                 <div className="flex gap-1.5 items-center">
                   <Input
@@ -196,10 +243,10 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
                     ×
                   </button>
                 </div>
-                <div className="grid grid-cols-3 gap-1.5">
+                <div className="grid grid-cols-2 gap-1.5">
                   <Input
                     type="number"
-                    placeholder="Cant."
+                    placeholder="Cantidad"
                     value={ing.quantity ?? ''}
                     onChange={e => updateIngredient(idx, 'quantity', e.target.value ? Number(e.target.value) : null)}
                     className="h-8 text-sm"
@@ -211,6 +258,8 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
                     onChange={e => updateIngredient(idx, 'unit', e.target.value)}
                     className="h-8 text-sm"
                   />
+                </div>
+                <div className="grid grid-cols-2 gap-1.5">
                   <Input
                     type="number"
                     placeholder="S/."
@@ -220,11 +269,14 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
                     min={0}
                     step={0.01}
                   />
+                  <div className="h-8 flex items-center px-2 text-sm text-muted-foreground bg-muted rounded-md border">
+                    {ing.estimated_kcal ? `~${ing.estimated_kcal} kcal` : '— kcal'}
+                  </div>
                 </div>
               </div>
 
-              {/* Desktop: fila en grid */}
-              <div className="hidden sm:grid grid-cols-[1fr_80px_80px_90px_32px] gap-1.5 items-center">
+              {/* Desktop */}
+              <div className="hidden sm:grid grid-cols-[1fr_70px_70px_80px_70px_32px] gap-1.5 items-center">
                 <Input
                   placeholder="Ej: Arroz"
                   value={ing.name}
@@ -254,6 +306,9 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
                   min={0}
                   step={0.01}
                 />
+                <div className="h-8 flex items-center px-2 text-xs text-muted-foreground bg-muted rounded-md border truncate">
+                  {ing.estimated_kcal ? `~${ing.estimated_kcal}` : '—'}
+                </div>
                 <button
                   type="button"
                   onClick={() => removeIngredient(idx)}
@@ -273,10 +328,16 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
 
       {error && <p className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md">{error}</p>}
 
+      {estimating && (
+        <p className="text-sm text-muted-foreground bg-muted px-3 py-2 rounded-md">
+          ✨ Estimando calorías con IA...
+        </p>
+      )}
+
       {/* Acciones */}
       <div className="flex gap-2 justify-end pt-1">
         <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
-        <Button type="submit" disabled={loading}>
+        <Button type="submit" disabled={loading || estimating}>
           {loading ? 'Guardando...' : dish ? 'Guardar cambios' : 'Crear plato'}
         </Button>
       </div>

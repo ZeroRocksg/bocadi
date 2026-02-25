@@ -32,7 +32,7 @@ export function DroppableCell({ id, entries, onRemove }: Props) {
           <span className="truncate flex-1">{entry.dish?.name}</span>
           <button
             onClick={e => { e.stopPropagation(); onRemove(entry.id) }}
-            className="flex-shrink-0 w-4 h-4 flex items-center justify-center rounded hover:bg-black/20 transition-colors font-bold"
+            className="flex-shrink-0 w-5 h-5 flex items-center justify-center rounded hover:bg-black/20 transition-colors font-bold"
           >
             ×
           </button>

@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { ProteinTypeManager } from '@/components/workspace/protein-type-manager'
+import { ThemeSelector } from '@/components/theme/theme-selector'
 import { Button } from '@/components/ui/button'
 
 export default async function WorkspaceSettingsPage() {
@@ -9,7 +10,6 @@ export default async function WorkspaceSettingsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Obtener workspace activo
   const { data: memberRow } = await supabase
     .from('workspace_members')
     .select('workspace_id, workspaces(id, name)')
@@ -21,7 +21,6 @@ export default async function WorkspaceSettingsPage() {
 
   const workspace = memberRow.workspaces as unknown as { id: string; name: string }
 
-  // Obtener tipos de proteína
   const { data: proteinTypes } = await supabase
     .from('protein_types')
     .select('*')
@@ -29,7 +28,7 @@ export default async function WorkspaceSettingsPage() {
     .order('created_at')
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-2xl space-y-8">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="sm" asChild>
           <Link href="/workspace">← Volver</Link>
@@ -40,10 +39,25 @@ export default async function WorkspaceSettingsPage() {
         </div>
       </div>
 
-      <ProteinTypeManager
-        workspaceId={workspace.id}
-        proteinTypes={proteinTypes ?? []}
-      />
+      {/* Apariencia */}
+      <div className="space-y-3">
+        <h2 className="font-semibold text-lg">Apariencia</h2>
+        <div className="bg-card border rounded-lg px-4 py-4 space-y-3">
+          <p className="text-sm text-muted-foreground">Selecciona el tema visual de la aplicación:</p>
+          <div className="flex items-center gap-4">
+            <ThemeSelector showLabels />
+          </div>
+        </div>
+      </div>
+
+      {/* Tipos de proteína */}
+      <div className="space-y-3">
+        <h2 className="font-semibold text-lg">Tipos de proteína</h2>
+        <ProteinTypeManager
+          workspaceId={workspace.id}
+          proteinTypes={proteinTypes ?? []}
+        />
+      </div>
     </div>
   )
 }

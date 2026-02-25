@@ -8,27 +8,40 @@ const THEMES: { id: Theme; bg: string; ring: string; label: string }[] = [
   { id: 'sepia', bg: '#C17A3A', ring: '#A0612E', label: 'Sepia' },
 ]
 
-export function ThemeSelector() {
+interface Props {
+  showLabels?: boolean
+}
+
+export function ThemeSelector({ showLabels }: Props) {
   const { theme, setTheme } = useTheme()
 
   return (
-    <div className="flex items-center gap-1.5" title="Cambiar tema">
+    <div className="flex items-center gap-3" title="Cambiar tema">
       {THEMES.map(t => (
         <button
           key={t.id}
           onClick={() => setTheme(t.id)}
           title={t.label}
-          className={`w-5 h-5 rounded-full border-2 transition-transform ${
-            theme === t.id ? 'scale-125' : 'scale-100 hover:scale-110'
-          }`}
-          style={{
-            backgroundColor: t.bg,
-            borderColor: t.ring,
-            outline: theme === t.id ? `2px solid ${t.ring}` : 'none',
-            outlineOffset: '1px',
-          }}
+          className="flex flex-col items-center gap-1.5 group"
           aria-label={t.label}
-        />
+        >
+          <span
+            className={`w-7 h-7 rounded-full border-2 transition-all block ${
+              theme === t.id ? 'scale-125' : 'scale-100 group-hover:scale-110'
+            }`}
+            style={{
+              backgroundColor: t.bg,
+              borderColor: t.ring,
+              outline: theme === t.id ? `2px solid ${t.ring}` : 'none',
+              outlineOffset: '2px',
+            }}
+          />
+          {showLabels && (
+            <span className={`text-xs transition-colors ${theme === t.id ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+              {t.label}
+            </span>
+          )}
+        </button>
       ))}
     </div>
   )

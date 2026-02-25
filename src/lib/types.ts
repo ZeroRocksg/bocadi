@@ -1,6 +1,15 @@
 export type WorkspaceRole = 'owner' | 'member'
 export type DayOfWeek = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday'
-export type MealSlot = 'breakfast' | 'lunch' | 'dinner'
+export type MealSlotKey = 'breakfast' | 'lunch' | 'dinner' // legacy text field
+
+export interface MealSlot {
+  id: string
+  workspace_id: string
+  name: string
+  sort_order: number
+  is_default: boolean
+  created_at: string
+}
 
 export interface Workspace {
   id: string
@@ -43,6 +52,7 @@ export interface Ingredient {
   quantity: number | null
   unit: string | null
   estimated_cost: number
+  estimated_kcal: number
   created_at: string
 }
 
@@ -52,7 +62,8 @@ export interface WeekPlanEntry {
   dish_id: string
   week_start: string // ISO date: YYYY-MM-DD (lunes de la semana)
   day_of_week: DayOfWeek
-  meal_slot: MealSlot
+  meal_slot: MealSlotKey  // legacy
+  meal_slot_id: string | null  // nuevo (UUID de meal_slots)
   created_at: string
   // Relación opcional
   dish?: Dish
@@ -67,8 +78,10 @@ export interface DishFormData {
 }
 
 export interface IngredientFormData {
+  id?: string
   name: string
   quantity: number | null
   unit: string
   estimated_cost: number
+  estimated_kcal: number
 }

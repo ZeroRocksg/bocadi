@@ -45,6 +45,9 @@ export function DishCatalog({ workspaceId, dishes, proteinTypes }: Props) {
   const totalCostDetail = detailDish?.ingredients?.reduce(
     (sum, i) => sum + (i.estimated_cost || 0), 0
   ) ?? 0
+  const totalKcalDetail = detailDish?.ingredients?.reduce(
+    (sum, i) => sum + (i.estimated_kcal || 0), 0
+  ) ?? 0
 
   return (
     <>
@@ -73,7 +76,7 @@ export function DishCatalog({ workspaceId, dishes, proteinTypes }: Props) {
 
       {/* Modal: Crear plato */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen} modal={false}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Nuevo plato</DialogTitle>
           </DialogHeader>
@@ -88,7 +91,7 @@ export function DishCatalog({ workspaceId, dishes, proteinTypes }: Props) {
 
       {/* Modal: Editar plato */}
       <Dialog open={!!editDish} onOpenChange={open => !open && setEditDish(null)} modal={false}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Editar plato</DialogTitle>
           </DialogHeader>
@@ -106,7 +109,7 @@ export function DishCatalog({ workspaceId, dishes, proteinTypes }: Props) {
 
       {/* Modal: Detalle del plato */}
       <Dialog open={!!detailDish} onOpenChange={open => !open && setDetailDish(null)}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="w-[calc(100vw-2rem)] sm:max-w-lg">
           {detailDish && (
             <>
               <DialogHeader>
@@ -128,7 +131,6 @@ export function DishCatalog({ workspaceId, dishes, proteinTypes }: Props) {
                   <p className="text-muted-foreground">{detailDish.description}</p>
                 )}
 
-                {/* Ingredientes */}
                 {detailDish.ingredients && detailDish.ingredients.length > 0 && (
                   <div>
                     <h4 className="font-medium mb-2 text-sm text-muted-foreground uppercase tracking-wide">
@@ -136,7 +138,7 @@ export function DishCatalog({ workspaceId, dishes, proteinTypes }: Props) {
                     </h4>
                     <ul className="divide-y border rounded-lg">
                       {detailDish.ingredients.map(ing => (
-                        <li key={ing.id} className="flex items-center justify-between px-3 py-2 text-sm">
+                        <li key={ing.id} className="flex items-center justify-between px-3 py-2 text-sm flex-wrap gap-1">
                           <span>
                             {ing.name}
                             {ing.quantity && (
@@ -145,26 +147,35 @@ export function DishCatalog({ workspaceId, dishes, proteinTypes }: Props) {
                               </span>
                             )}
                           </span>
-                          <span className="text-muted-foreground">S/. {(ing.estimated_cost || 0).toFixed(2)}</span>
+                          <div className="flex items-center gap-3 text-muted-foreground">
+                            {ing.estimated_kcal > 0 && (
+                              <span className="text-xs">~{ing.estimated_kcal} kcal</span>
+                            )}
+                            <span>S/. {(ing.estimated_cost || 0).toFixed(2)}</span>
+                          </div>
                         </li>
                       ))}
                     </ul>
                   </div>
                 )}
 
-                {/* Costo total */}
-                <div className="flex justify-between items-center pt-1 border-t font-semibold">
-                  <span>Costo total</span>
-                  <span>S/. {totalCostDetail.toFixed(2)}</span>
+                {/* Totales */}
+                <div className="space-y-1 pt-1 border-t">
+                  <div className="flex justify-between items-center text-sm font-semibold">
+                    <span>Costo total</span>
+                    <span>S/. {totalCostDetail.toFixed(2)}</span>
+                  </div>
+                  {totalKcalDetail > 0 && (
+                    <div className="flex justify-between items-center text-sm text-muted-foreground">
+                      <span>Calorías totales</span>
+                      <span>~{totalKcalDetail} kcal</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Acciones */}
                 <div className="flex gap-2 justify-end pt-2">
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => handleDelete(detailDish)}
-                  >
+                  <Button variant="destructive" size="sm" onClick={() => handleDelete(detailDish)}>
                     Eliminar
                   </Button>
                   <Button

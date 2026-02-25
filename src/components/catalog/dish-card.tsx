@@ -9,6 +9,7 @@ interface Props {
 
 export function DishCard({ dish, onClick }: Props) {
   const totalCost = dish.ingredients?.reduce((sum, i) => sum + (i.estimated_cost || 0), 0) ?? 0
+  const totalKcal = dish.ingredients?.reduce((sum, i) => sum + (i.estimated_kcal || 0), 0) ?? 0
   const proteinColor = dish.protein_type?.color
 
   return (
@@ -16,7 +17,6 @@ export function DishCard({ dish, onClick }: Props) {
       className="cursor-pointer hover:shadow-md transition-shadow overflow-hidden"
       onClick={onClick}
     >
-      {/* Borde superior de color de proteína */}
       {proteinColor && (
         <div className="h-1.5 w-full" style={{ backgroundColor: proteinColor }} />
       )}
@@ -42,7 +42,12 @@ export function DishCard({ dish, onClick }: Props) {
           <span className="text-muted-foreground">
             {dish.ingredients?.length ?? 0} ingrediente{(dish.ingredients?.length ?? 0) !== 1 ? 's' : ''}
           </span>
-          <span className="font-medium">S/. {totalCost.toFixed(2)}</span>
+          <div className="text-right">
+            <span className="font-medium">S/. {totalCost.toFixed(2)}</span>
+            {totalKcal > 0 && (
+              <span className="ml-1.5 text-xs text-muted-foreground">~{totalKcal} kcal</span>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>
