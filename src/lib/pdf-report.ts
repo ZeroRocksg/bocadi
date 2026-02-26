@@ -1,6 +1,8 @@
 import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
+import autoTable, { type CellDef } from 'jspdf-autotable'
 import type { Dish, Ingredient, WeekPlanEntry } from './types'
+
+type CellInput = string | number | CellDef
 
 // Reference values
 const REFS = {
@@ -295,7 +297,7 @@ export async function generateNutritionReport(opts: ReportOptions): Promise<void
   addHeader('Detalle Diario', 3)
 
   const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
-  const tableRows: (string | number)[][] = []
+  const tableRows: CellInput[][] = []
 
   dayOrder.forEach(day => {
     const dayEntries = entries.filter(e => e.day_of_week === day)
@@ -320,7 +322,7 @@ export async function generateNutritionReport(opts: ReportOptions): Promise<void
     startY: 32,
     margin: { left: margin, right: margin },
     head: [['Día', 'Plato', 'Kcal', 'Prot', 'Carbs', 'Grasas']],
-    body: tableRows as Parameters<typeof autoTable>[1]['body'],
+    body: tableRows,
     headStyles: { fillColor: PRIMARY, textColor: [255, 255, 255], fontSize: 9 },
     bodyStyles: { fontSize: 8 },
     theme: 'striped',
