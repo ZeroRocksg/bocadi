@@ -24,7 +24,17 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { DraggableDish } from './draggable-dish'
 import { DroppableCell } from './droppable-cell'
+import { PdfReportDialog } from './pdf-report-dialog'
 import type { Dish, MealSlot, WeekPlanEntry } from '@/lib/types'
+
+type MacroKey = 'kcal' | 'protein_g' | 'carbs_g' | 'fat_g'
+
+const MACRO_OPTIONS: { key: MacroKey; label: string; limit: number; unit: string }[] = [
+  { key: 'kcal',      label: 'Calorías',      limit: 2000, unit: 'kcal' },
+  { key: 'protein_g', label: 'Proteínas',     limit: 50,   unit: 'g' },
+  { key: 'carbs_g',   label: 'Carbohidratos', limit: 275,  unit: 'g' },
+  { key: 'fat_g',     label: 'Grasas',        limit: 78,   unit: 'g' },
+]
 
 const DAYS = [
   { key: 'monday',    label: 'Lun' },
@@ -43,7 +53,7 @@ const FALLBACK_SLOTS: MealSlot[] = [
   { id: 'dinner',    workspace_id: '', name: 'Cena',     sort_order: 3, is_default: true, created_at: '' },
 ]
 
-const KCAL_LIMIT = 2000
+const KCAL_LIMIT = 2000 // kept for legacy tooltip usage
 
 function getMonday(date: Date): Date {
   const d = new Date(date)
@@ -68,11 +78,13 @@ type EntryWithDish = WeekPlanEntry & { dish: Dish }
 
 interface Props {
   workspaceId: string
+  workspaceName: string
+  userEmail: string
   dishes: Dish[]
 }
 
-// Tooltip personalizado para el gráfico de calorías
-function KcalTooltip({ active, payload, label }: { active?: boolean; payload?: { dataKey: string; value: number; name: string; fill: string; payload: Record<string, number | string> }[]; label?: string }) {
+// Tooltip personalizado para el gráfico de macros
+function MacroTooltip({ active, payload, label, unit }: { active?: boolean; payload?: { dataKey: string; value: number; name: string; fill: string; payload: Record<string, number | string> }[]; label?: string; unit: string }) {
   if (!active || !payload?.length) return null
   const data = payload[0]?.payload as Record<string, number>
   const total = (data.__total__ as number) || 0
@@ -84,16 +96,16 @@ function KcalTooltip({ active, payload, label }: { active?: boolean; payload?: {
       <p className="font-semibold text-foreground">{label}</p>
       {realEntries.map(p => (
         <p key={p.dataKey} style={{ color: p.fill }}>
-          {p.name}: {Math.round(p.value * (total / Math.min(total, KCAL_LIMIT) || 1))} kcal
+          {p.name}: {p.value.toFixed(1)} {unit}
         </p>
       ))}
-      {excess > 0 && <p className="text-[#E53E3E] font-medium">+{Math.round(excess)} exceso</p>}
-      <p className="font-semibold border-t pt-1 text-foreground">Total: {Math.round(total)} kcal</p>
+      {excess > 0 && <p className="text-[#E53E3E] font-medium">+{excess.toFixed(1)} exceso</p>}
+      <p className="font-semibold border-t pt-1 text-foreground">Total: {total.toFixed(1)} {unit}</p>
     </div>
   )
 }
 
-export function WeekPlanner({ workspaceId, dishes }: Props) {
+export function WeekPlanner({ workspaceId, workspaceName, userEmail, dishes }: Props) {
   const supabase = createClient()
   const sensors = useSensors(
     useSensor(MouseSensor),
@@ -106,6 +118,7 @@ export function WeekPlanner({ workspaceId, dishes }: Props) {
   const [entries, setEntries] = useState<EntryWithDish[]>([])
   const [loading, setLoading] = useState(false)
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [selectedMacro, setSelectedMacro] = useState<MacroKey>('kcal')
 
   // Meal slots
   const [allSlots, setAllSlots] = useState<MealSlot[]>(FALLBACK_SLOTS)
@@ -255,16 +268,29 @@ export function WeekPlanner({ workspaceId, dishes }: Props) {
   const proteinList = Object.values(proteinMap)
   const totalProteins = proteinList.reduce((s, v) => s + v.count, 0)
 
-  // ── Gráfico de calorías ──
+  // ── Gráfico de macros ──
   const proteinTypesForChart = [
     ...new Map(
       entries.filter(e => e.dish?.protein_type).map(e => [e.dish!.protein_type!.id, e.dish!.protein_type!])
     ).values(),
   ]
 
-  const totalWeekKcal = entries.reduce((sum, e) => {
-    return sum + (e.dish?.ingredients?.reduce((s, i) => s + (i.estimated_kcal || 0), 0) ?? 0)
-  }, 0)
+  const activeMacroOpt = MACRO_OPTIONS.find(m => m.key === selectedMacro)!
+
+  function getEntryMacroValue(entry: EntryWithDish, macro: MacroKey): number {
+    return entry.dish?.ingredients?.reduce((s, i) => {
+      if (macro === 'kcal') return s + (i.estimated_kcal || 0)
+      if (macro === 'protein_g') return s + (i.protein_g || 0)
+      if (macro === 'carbs_g') return s + (i.carbs_g || 0)
+      if (macro === 'fat_g') return s + (i.fat_g || 0)
+      return s
+    }, 0) ?? 0
+  }
+
+  const totalWeekMacro = entries.reduce((sum, e) => sum + getEntryMacroValue(e, selectedMacro), 0)
+  const totalWeekKcal = entries.reduce((sum, e) => sum + getEntryMacroValue(e, 'kcal'), 0)
+
+  const macroLimit = activeMacroOpt.limit
 
   const chartData = DAYS.map(day => {
     const dayEntries = entries.filter(e => e.day_of_week === day.key)
@@ -272,27 +298,27 @@ export function WeekPlanner({ workspaceId, dishes }: Props) {
     let total = 0
 
     dayEntries.forEach(entry => {
-      const kcal = entry.dish?.ingredients?.reduce((s, i) => s + (i.estimated_kcal || 0), 0) || 0
+      const val = getEntryMacroValue(entry, selectedMacro)
       const ptId = entry.dish?.protein_type?.id || '__none__'
-      rawByPt[ptId] = (rawByPt[ptId] || 0) + kcal
-      total += kcal
+      rawByPt[ptId] = (rawByPt[ptId] || 0) + val
+      total += val
     })
 
-    const capped = Math.min(total, KCAL_LIMIT)
+    const capped = Math.min(total, macroLimit)
     const scale = total > 0 ? capped / total : 1
     const result: Record<string, number | string> = { day: day.label }
 
-    Object.entries(rawByPt).forEach(([ptId, kcal]) => {
-      result[ptId] = Math.round(kcal * scale)
+    Object.entries(rawByPt).forEach(([ptId, val]) => {
+      result[ptId] = Number((val * scale).toFixed(1))
     })
-    result.__excess__ = Math.max(0, total - KCAL_LIMIT)
+    result.__excess__ = Math.max(0, total - macroLimit)
     result.__total__ = total
-    result.__empty__ = total === 0 ? 80 : 0
+    result.__empty__ = total === 0 ? macroLimit * 0.04 : 0
 
     return result
   })
 
-  const showKcalChart = totalWeekKcal > 0
+  const showChart = totalWeekMacro > 0 || totalWeekKcal > 0
 
   const activeDish = activeId ? dishes.find(d => `drag-${d.id}` === activeId) : null
 
@@ -337,9 +363,18 @@ export function WeekPlanner({ workspaceId, dishes }: Props) {
                 Hoy
               </Button>
             </div>
-            <p className="text-sm">
-              Costo: <span className="font-semibold">S/. {weekCost.toFixed(2)}</span>
-            </p>
+            <div className="flex items-center gap-3">
+              <p className="text-sm">
+                Costo: <span className="font-semibold">S/. {weekCost.toFixed(2)}</span>
+              </p>
+              <PdfReportDialog
+                entries={entries}
+                weekStart={weekStart}
+                workspaceId={workspaceId}
+                workspaceName={workspaceName}
+                userEmail={userEmail}
+              />
+            </div>
           </div>
 
           {/* Grilla */}
@@ -435,12 +470,32 @@ export function WeekPlanner({ workspaceId, dishes }: Props) {
             )}
           </div>
 
-          {/* ── Gráfico de calorías ── */}
-          {showKcalChart && (
+          {/* ── Gráfico de macros ── */}
+          {showChart && (
             <div className="mt-3 flex-shrink-0 space-y-1">
+              {/* Selector de nutriente — scrolleable en móvil */}
+              <div className="overflow-x-auto">
+                <div className="flex gap-1 min-w-max pb-1">
+                  {MACRO_OPTIONS.map(opt => (
+                    <button
+                      key={opt.key}
+                      onClick={() => setSelectedMacro(opt.key)}
+                      className={`px-2.5 py-0.5 rounded-full text-xs font-medium border transition-colors whitespace-nowrap ${
+                        selectedMacro === opt.key
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'border-border text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <div className="flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">Consumo calórico semanal</p>
-                <p className="text-xs font-semibold">Total: {Math.round(totalWeekKcal).toLocaleString()} kcal</p>
+                <p className="text-xs text-muted-foreground">{activeMacroOpt.label} semanal</p>
+                <p className="text-xs font-semibold">
+                  Total: {totalWeekMacro.toFixed(selectedMacro === 'kcal' ? 0 : 1)} {activeMacroOpt.unit}
+                </p>
               </div>
               <div className="overflow-x-auto">
                 <div style={{ minWidth: 500 }}>
@@ -448,9 +503,13 @@ export function WeekPlanner({ workspaceId, dishes }: Props) {
                     <BarChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
                       <XAxis dataKey="day" tick={{ fontSize: 11 }} />
                       <YAxis tick={{ fontSize: 10 }} />
-                      <Tooltip content={<KcalTooltip />} />
-                      <ReferenceLine y={KCAL_LIMIT} stroke="#6B7280" strokeDasharray="4 2" label={{ value: '2000', fontSize: 10, fill: '#6B7280' }} />
-
+                      <Tooltip content={<MacroTooltip unit={activeMacroOpt.unit} />} />
+                      <ReferenceLine
+                        y={macroLimit}
+                        stroke="#6B7280"
+                        strokeDasharray="4 2"
+                        label={{ value: `${macroLimit}`, fontSize: 10, fill: '#6B7280' }}
+                      />
                       {proteinTypesForChart.map(pt => (
                         <Bar key={pt.id} dataKey={pt.id} stackId="a" fill={pt.color} name={pt.name} />
                       ))}

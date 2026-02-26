@@ -11,7 +11,7 @@ export default async function PlannerPage() {
   // Workspace activo
   const { data: memberRow } = await supabase
     .from('workspace_members')
-    .select('workspace_id')
+    .select('workspace_id, workspaces(id, name)')
     .eq('user_id', user.id)
     .limit(1)
     .single()
@@ -25,6 +25,7 @@ export default async function PlannerPage() {
   }
 
   const workspaceId = memberRow.workspace_id
+  const workspace = memberRow.workspaces as unknown as { id: string; name: string }
 
   // Platos con proteína e ingredientes (para cálculo de costos)
   const { data: dishes } = await supabase
@@ -36,6 +37,8 @@ export default async function PlannerPage() {
   return (
     <WeekPlanner
       workspaceId={workspaceId}
+      workspaceName={workspace?.name ?? 'Mi espacio'}
+      userEmail={user.email ?? ''}
       dishes={(dishes as Dish[]) ?? []}
     />
   )

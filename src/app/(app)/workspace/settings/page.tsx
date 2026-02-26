@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { ProteinTypeManager } from '@/components/workspace/protein-type-manager'
+import { NutritionistProfileForm } from '@/components/workspace/nutritionist-profile-form'
 import { ThemeSelector } from '@/components/theme/theme-selector'
 import { Button } from '@/components/ui/button'
 
@@ -26,6 +27,12 @@ export default async function WorkspaceSettingsPage() {
     .select('*')
     .eq('workspace_id', workspace.id)
     .order('created_at')
+
+  const { data: nutritionistProfile } = await supabase
+    .from('nutritionist_profile')
+    .select('name, license_number, logo_url')
+    .eq('workspace_id', workspace.id)
+    .maybeSingle()
 
   return (
     <div className="max-w-2xl space-y-8">
@@ -56,6 +63,18 @@ export default async function WorkspaceSettingsPage() {
         <ProteinTypeManager
           workspaceId={workspace.id}
           proteinTypes={proteinTypes ?? []}
+        />
+      </div>
+
+      {/* Perfil del nutricionista */}
+      <div className="space-y-3">
+        <div>
+          <h2 className="font-semibold text-lg">Perfil del Nutricionista</h2>
+          <p className="text-sm text-muted-foreground">Información que aparecerá en los reportes PDF generados.</p>
+        </div>
+        <NutritionistProfileForm
+          workspaceId={workspace.id}
+          initial={nutritionistProfile ?? null}
         />
       </div>
     </div>

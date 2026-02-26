@@ -42,12 +42,11 @@ export function DishCatalog({ workspaceId, dishes, proteinTypes }: Props) {
     router.refresh()
   }
 
-  const totalCostDetail = detailDish?.ingredients?.reduce(
-    (sum, i) => sum + (i.estimated_cost || 0), 0
-  ) ?? 0
-  const totalKcalDetail = detailDish?.ingredients?.reduce(
-    (sum, i) => sum + (i.estimated_kcal || 0), 0
-  ) ?? 0
+  const totalCostDetail = detailDish?.ingredients?.reduce((sum, i) => sum + (i.estimated_cost || 0), 0) ?? 0
+  const totalKcalDetail = detailDish?.ingredients?.reduce((sum, i) => sum + (i.estimated_kcal || 0), 0) ?? 0
+  const totalProteinDetail = detailDish?.ingredients?.reduce((sum, i) => sum + (i.protein_g || 0), 0) ?? 0
+  const totalCarbsDetail = detailDish?.ingredients?.reduce((sum, i) => sum + (i.carbs_g || 0), 0) ?? 0
+  const totalFatDetail = detailDish?.ingredients?.reduce((sum, i) => sum + (i.fat_g || 0), 0) ?? 0
 
   return (
     <>
@@ -168,7 +167,14 @@ export function DishCatalog({ workspaceId, dishes, proteinTypes }: Props) {
                   {totalKcalDetail > 0 && (
                     <div className="flex justify-between items-center text-sm text-muted-foreground">
                       <span>Calorías totales</span>
-                      <span>~{totalKcalDetail} kcal</span>
+                      <span>~{Math.round(totalKcalDetail)} kcal</span>
+                    </div>
+                  )}
+                  {(totalProteinDetail > 0 || totalCarbsDetail > 0 || totalFatDetail > 0) && (
+                    <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground">
+                      {totalProteinDetail > 0 && <span>💪 {totalProteinDetail.toFixed(1)}g prot</span>}
+                      {totalCarbsDetail > 0 && <span>🌾 {totalCarbsDetail.toFixed(1)}g carbs</span>}
+                      {totalFatDetail > 0 && <span>🥑 {totalFatDetail.toFixed(1)}g grasas</span>}
                     </div>
                   )}
                 </div>

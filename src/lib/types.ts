@@ -53,6 +53,16 @@ export interface Ingredient {
   unit: string | null
   estimated_cost: number
   estimated_kcal: number
+  protein_g?: number
+  carbs_g?: number
+  fat_g?: number
+  fiber_g?: number
+  sodium_mg?: number
+  vitamin_c_mg?: number
+  vitamin_d_ui?: number
+  calcium_mg?: number
+  iron_mg?: number
+  potassium_mg?: number
   created_at: string
 }
 
@@ -84,4 +94,14 @@ export interface IngredientFormData {
   unit: string
   estimated_cost: number
   estimated_kcal: number
+  protein_g?: number
+  carbs_g?: number
+  fat_g?: number
+  fiber_g?: number
+  sodium_mg?: number
+  vitamin_c_mg?: number
+  vitamin_d_ui?: number
+  calcium_mg?: number
+  iron_mg?: number
+  potassium_mg?: number
 }
