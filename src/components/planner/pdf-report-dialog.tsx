@@ -8,7 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { generateNutritionReport } from '@/lib/pdf-report'
 import type { WeekPlanEntry, Dish } from '@/lib/types'
 
 type EntryWithDish = WeekPlanEntry & { dish: Dish }
@@ -31,8 +30,12 @@ export function PdfReportDialog({ entries, weekStart, workspaceId, workspaceName
   async function handleGenerate() {
     setGenerating(true)
     try {
-      // Cargar perfil del nutricionista
-      const { createClient } = await import('@/lib/supabase/client')
+      // Importar dinámicamente para evitar problemas de SSR con jsPDF
+      const [{ generateNutritionReport }, { createClient }] = await Promise.all([
+        import('@/lib/pdf-report'),
+        import('@/lib/supabase/client'),
+      ])
+
       const supabase = createClient()
       const { data: profile } = await supabase
         .from('nutritionist_profile')
