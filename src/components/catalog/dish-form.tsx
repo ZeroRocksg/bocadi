@@ -95,6 +95,7 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
 
   async function handleRecalculate(index: number) {
     const ing = ingredients[index]
+    console.log('[recalculate] ing:', ing)
     if (!ing.id || !ing.name) return
 
     setRecalculating(prev => new Set(prev).add(index))
