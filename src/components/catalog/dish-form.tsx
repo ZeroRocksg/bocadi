@@ -19,7 +19,7 @@ interface Props {
 const emptyIngredient = (): IngredientFormData => ({
   name: '',
   quantity: null,
-  unit: '',
+  unit: 'gr',
   estimated_cost: 0,
   estimated_kcal: 0,
   protein_g: 0,

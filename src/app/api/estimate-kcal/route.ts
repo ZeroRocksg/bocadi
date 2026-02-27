@@ -103,18 +103,19 @@ export async function POST(req: NextRequest) {
   const needGroq = valid.filter((ing, idx) => !nutritionMap[cacheKeys[idx]])
 
   if (needGroq.length > 0) {
-    const prompt = `Nutrition data for ${needGroq.length} ingredient(s). Respond ONLY with a JSON array, no text, no markdown.
-Each object must have exactly these keys (numbers only, 0 if unknown):
+    const prompt = `You are a nutrition database. Return ONLY a JSON array with ${needGroq.length} objects, no markdown, no explanation.
+Each object must have these exact numeric keys:
 {"kcal":0,"protein_g":0,"carbs_g":0,"fat_g":0,"fiber_g":0,"sodium_mg":0,"vitamin_c_mg":0,"vitamin_d_ui":0,"calcium_mg":0,"iron_mg":0,"potassium_mg":0}
-Ingredients:
-${needGroq.map((i, idx) => `${idx + 1}. ${i.quantity ?? ''}${i.unit ?? ''} ${i.name}`).join('\n')}`
+
+Calculate nutrition for each ingredient at the exact quantity and unit given:
+${needGroq.map((i, idx) => `${idx + 1}. ${i.quantity ?? '100'}${i.unit ?? 'g'} of ${i.name}`).join('\n')}`
 
     try {
       const client = getAIClient()
       const completion = await client.chat.completions.create({
         model: 'llama-3.1-8b-instant',
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: needGroq.length * 80,
+        max_tokens: Math.max(500, needGroq.length * 150),
         temperature: 0,
       })
 
