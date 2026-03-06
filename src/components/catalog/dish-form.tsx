@@ -50,7 +50,7 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
   const [loading, setLoading] = useState(false)
   const [estimating, setEstimating] = useState(false)
   const [recalculating, setRecalculating] = useState<Set<number>>(new Set())
-  const [suggestions, setSuggestions] = useState<Record<number, {id: string, name: string, kcal: number, protein_g: number, carbs_g: number, fat_g: number}[]>>({})
+  const [suggestions, setSuggestions] = useState<Record<number, {id: string, name: string, kcal: number, protein_g: number, carbs_g: number, fat_g: number, fiber_g: number, sodium_mg: number, vitamin_c_mg: number, vitamin_d_ui: number, calcium_mg: number, iron_mg: number, potassium_mg: number}[]>>({})
   const [showSuggestions, setShowSuggestions] = useState<Record<number, boolean>>({})
   const [error, setError] = useState('')
 
