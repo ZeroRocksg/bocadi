@@ -107,10 +107,26 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
   setShowSuggestions(prev => ({ ...prev, [index]: true }))
 }
 
-function selectFromLibrary(index: number, item: {id: string, name: string, kcal: number, protein_g: number, carbs_g: number, fat_g: number}) {
+function selectFromLibrary(index: number, item: {id: string, name: string, kcal: number, protein_g: number, carbs_g: number, fat_g: number, fiber_g: number, sodium_mg: number, vitamin_c_mg: number, vitamin_d_ui: number, calcium_mg: number, iron_mg: number, potassium_mg: number}) {
+  const qty = ingredients[index].quantity ?? 100
+  const factor = qty / 100
   setIngredients(prev => prev.map((ing, i) =>
     i === index
-      ? { ...ing, name: item.name, estimated_kcal: item.kcal, protein_g: item.protein_g, carbs_g: item.carbs_g, fat_g: item.fat_g }
+      ? {
+          ...ing,
+          name: item.name,
+          estimated_kcal: Math.round(item.kcal * factor),
+          protein_g: Math.round(item.protein_g * factor * 10) / 10,
+          carbs_g: Math.round(item.carbs_g * factor * 10) / 10,
+          fat_g: Math.round(item.fat_g * factor * 10) / 10,
+          fiber_g: Math.round(item.fiber_g * factor * 10) / 10,
+          sodium_mg: Math.round(item.sodium_mg * factor),
+          vitamin_c_mg: Math.round(item.vitamin_c_mg * factor * 10) / 10,
+          vitamin_d_ui: Math.round(item.vitamin_d_ui * factor),
+          calcium_mg: Math.round(item.calcium_mg * factor),
+          iron_mg: Math.round(item.iron_mg * factor * 10) / 10,
+          potassium_mg: Math.round(item.potassium_mg * factor),
+        }
       : ing
   ))
   setShowSuggestions(prev => ({ ...prev, [index]: false }))
