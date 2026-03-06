@@ -50,6 +50,8 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
   const [loading, setLoading] = useState(false)
   const [estimating, setEstimating] = useState(false)
   const [recalculating, setRecalculating] = useState<Set<number>>(new Set())
+  const [suggestions, setSuggestions] = useState<Record<number, {id: string, name: string, kcal: number, protein_g: number, carbs_g: number, fat_g: number}[]>>({})
+  const [showSuggestions, setShowSuggestions] = useState<Record<number, boolean>>({})
   const [error, setError] = useState('')
 
   const totalCost = ingredients.reduce((sum, i) => sum + (Number(i.estimated_cost) || 0), 0)
@@ -92,6 +94,27 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
     const data = await resp.json()
     return data.results ?? []
   }
+
+  async function searchLibrary(index: number, query: string) {
+  updateIngredient(index, 'name', query)
+  if (query.length < 2) {
+    setShowSuggestions(prev => ({ ...prev, [index]: false }))
+    return
+  }
+  const resp = await fetch(`/api/ingredient-library?q=${encodeURIComponent(query)}`)
+  const data = await resp.json()
+  setSuggestions(prev => ({ ...prev, [index]: data.results ?? [] }))
+  setShowSuggestions(prev => ({ ...prev, [index]: true }))
+}
+
+function selectFromLibrary(index: number, item: {id: string, name: string, kcal: number, protein_g: number, carbs_g: number, fat_g: number}) {
+  setIngredients(prev => prev.map((ing, i) =>
+    i === index
+      ? { ...ing, name: item.name, estimated_kcal: item.kcal, protein_g: item.protein_g, carbs_g: item.carbs_g, fat_g: item.fat_g }
+      : ing
+  ))
+  setShowSuggestions(prev => ({ ...prev, [index]: false }))
+}
 
   async function handleRecalculate(index: number) {
     const ing = ingredients[index]
@@ -285,12 +308,30 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
               {/* Mobile */}
               <div className="sm:hidden border rounded-lg p-2 space-y-1.5">
                 <div className="flex gap-1.5 items-center">
-                  <Input
-                    placeholder="Ej: Arroz"
-                    value={ing.name}
-                    onChange={e => updateIngredient(idx, 'name', e.target.value)}
-                    className="h-8 text-sm flex-1"
-                  />
+                  <div className="relative flex-1">
+                    <Input
+                      placeholder="Ej: Arroz"
+                      value={ing.name}
+                      onChange={e => searchLibrary(idx, e.target.value)}
+                      onBlur={() => setTimeout(() => setShowSuggestions(prev => ({ ...prev, [idx]: false })), 150)}
+                      className="h-8 text-sm w-full"
+                    />
+                    {showSuggestions[idx] && suggestions[idx]?.length > 0 && (
+                      <div className="absolute z-50 top-full left-0 right-0 bg-popover border rounded-md shadow-lg mt-1 max-h-48 overflow-y-auto">
+                        {suggestions[idx].map(item => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onMouseDown={() => selectFromLibrary(idx, item)}
+                            className="w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors"
+                          >
+                            <span className="font-medium">{item.name}</span>
+                            <span className="text-muted-foreground ml-2 text-xs">🔥 {item.kcal} kcal</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   {ing.id && (
                     <button
                       type="button"
@@ -354,12 +395,30 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
 
               {/* Desktop */}
               <div className="hidden sm:grid grid-cols-[1fr_70px_70px_80px_70px_36px_32px] gap-1.5 items-center">
+                <div className="relative">
                 <Input
                   placeholder="Ej: Arroz"
                   value={ing.name}
-                  onChange={e => updateIngredient(idx, 'name', e.target.value)}
+                  onChange={e => searchLibrary(idx, e.target.value)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(prev => ({ ...prev, [idx]: false })), 150)}
                   className="h-8 text-sm"
                 />
+                  {showSuggestions[idx] && suggestions[idx]?.length > 0 && (
+                    <div className="absolute z-50 top-full left-0 right-0 bg-popover border rounded-md shadow-lg mt-1 max-h-48 overflow-y-auto">
+                      {suggestions[idx].map(item => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onMouseDown={() => selectFromLibrary(idx, item)}
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors"
+                        >
+                          <span className="font-medium">{item.name}</span>
+                          <span className="text-muted-foreground ml-2 text-xs">🔥 {item.kcal} kcal</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <Input
                   type="number"
                   placeholder="0"
