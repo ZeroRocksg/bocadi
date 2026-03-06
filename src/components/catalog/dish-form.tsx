@@ -52,6 +52,7 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
   const [recalculating, setRecalculating] = useState<Set<number>>(new Set())
   const [suggestions, setSuggestions] = useState<Record<number, {id: string, name: string, kcal: number, protein_g: number, carbs_g: number, fat_g: number, fiber_g: number, sodium_mg: number, vitamin_c_mg: number, vitamin_d_ui: number, calcium_mg: number, iron_mg: number, potassium_mg: number}[]>>({})
   const [showSuggestions, setShowSuggestions] = useState<Record<number, boolean>>({})
+  const [libraryBase, setLibraryBase] = useState<Record<number, {kcal: number, protein_g: number, carbs_g: number, fat_g: number, fiber_g: number, sodium_mg: number, vitamin_c_mg: number, vitamin_d_ui: number, calcium_mg: number, iron_mg: number, potassium_mg: number}>>({})
   const [error, setError] = useState('')
 
   const totalCost = ingredients.reduce((sum, i) => sum + (Number(i.estimated_cost) || 0), 0)
@@ -61,10 +62,29 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
   const totalFat = ingredients.reduce((sum, i) => sum + (Number(i.fat_g) || 0), 0)
 
   function updateIngredient(index: number, field: keyof IngredientFormData, value: string | number | null) {
-    setIngredients(prev =>
-      prev.map((ing, i) => (i === index ? { ...ing, [field]: value } : ing))
-    )
-  }
+  setIngredients(prev =>
+    prev.map((ing, i) => {
+      if (i !== index) return ing
+      const updated = { ...ing, [field]: value }
+      if (field === 'quantity' && libraryBase[index]) {
+        const factor = (Number(value) || 0) / 100
+        const base = libraryBase[index]
+        updated.estimated_kcal = Math.round(base.kcal * factor)
+        updated.protein_g = Math.round(base.protein_g * factor * 10) / 10
+        updated.carbs_g = Math.round(base.carbs_g * factor * 10) / 10
+        updated.fat_g = Math.round(base.fat_g * factor * 10) / 10
+        updated.fiber_g = Math.round(base.fiber_g * factor * 10) / 10
+        updated.sodium_mg = Math.round(base.sodium_mg * factor)
+        updated.vitamin_c_mg = Math.round(base.vitamin_c_mg * factor * 10) / 10
+        updated.vitamin_d_ui = Math.round(base.vitamin_d_ui * factor)
+        updated.calcium_mg = Math.round(base.calcium_mg * factor)
+        updated.iron_mg = Math.round(base.iron_mg * factor * 10) / 10
+        updated.potassium_mg = Math.round(base.potassium_mg * factor)
+      }
+      return updated
+    })
+  )
+}
 
   function addIngredient() {
     setIngredients(prev => [...prev, emptyIngredient()])
@@ -108,6 +128,7 @@ export function DishForm({ workspaceId, proteinTypes, dish, onSave, onCancel }: 
 }
 
 function selectFromLibrary(index: number, item: {id: string, name: string, kcal: number, protein_g: number, carbs_g: number, fat_g: number, fiber_g: number, sodium_mg: number, vitamin_c_mg: number, vitamin_d_ui: number, calcium_mg: number, iron_mg: number, potassium_mg: number}) {
+  setLibraryBase(prev => ({ ...prev, [index]: item }))
   const qty = ingredients[index].quantity ?? 100
   const factor = qty / 100
   setIngredients(prev => prev.map((ing, i) =>
